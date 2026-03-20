@@ -17,22 +17,27 @@ export function NameInput({ onSubmit }: NameInputProps) {
     if (trimmed.length > 0) onSubmit(trimmed);
   };
 
+  const hijriYear = new Intl.DateTimeFormat("en-u-ca-islamic-uma", {
+    year: "numeric",
+  })
+    .format(new Date())
+    .replace(/\D/g, "");
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-10 text-center">
-        <div className="inline-block border-4 border-primary rounded-sm px-5 py-1 mb-4">
-          <span className="text-primary font-bold tracking-widest text-xs uppercase">
-            Selamat Hari Raya
-          </span>
-        </div>
         <h1
           className="text-5xl font-bold text-foreground mb-3 leading-tight"
-          style={{ fontFamily: "Georgia, serif", letterSpacing: "-0.02em" }}
+          style={{ 
+            fontFamily: "Georgia, serif", 
+            letterSpacing: "-0.02em",
+            textShadow: "0 1px 2px rgba(255,255,255,0.8)" 
+          }}
         >
-          Roda Putar THR
+          Dapatkan THR🤑
         </h1>
-        <p className="text-muted-foreground text-base max-w-sm mx-auto">
+        <p className="text-foreground/80 text-base max-w-sm mx-auto font-medium">
           Masukkan namamu untuk mulai memutar roda dan dapatkan THR-mu!
         </p>
       </div>
@@ -40,7 +45,7 @@ export function NameInput({ onSubmit }: NameInputProps) {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm flex flex-col gap-4"
+        className="w-full max-w-sm mx-auto flex flex-col gap-4"
       >
         <div className="flex flex-col gap-1.5">
           <label
@@ -57,15 +62,16 @@ export function NameInput({ onSubmit }: NameInputProps) {
             onBlur={() => setTouched(true)}
             placeholder="Tulis nama lengkapmu..."
             autoFocus
+            autoComplete="off"
             maxLength={40}
             style={{
               border: hasError
-                ? "2px solid hsl(4 72% 38%)"
+                ? "2px solid hsl(138 48% 30%)"
                 : "2px solid hsl(36 20% 75%)",
-              background: "hsl(0 0% 100%)",
+              background: "rgba(255, 255, 255, 0.6)",
               color: "hsl(20 15% 12%)",
               padding: "12px 16px",
-              borderRadius: "4px",
+              borderRadius: "9999px",
               fontSize: "1.05rem",
               fontFamily: "Georgia, serif",
               outline: "none",
@@ -73,36 +79,24 @@ export function NameInput({ onSubmit }: NameInputProps) {
               width: "100%",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = "hsl(4 72% 38%)";
+              e.target.style.borderColor = "hsl(138 48% 30%)";
             }}
           />
           {hasError && (
-            <p className="text-sm" style={{ color: "hsl(4 72% 38%)" }}>
+            <p className="text-sm" style={{ color: "hsl(138 48% 30%)" }}>
               Nama tidak boleh kosong.
             </p>
           )}
         </div>
 
-        <button
-          type="submit"
-          className="submit-btn"
-        >
+        <button type="submit" className="submit-btn">
           Lanjut ke Roda Putar →
         </button>
       </form>
 
-      {/* Decorative dividers */}
-      <div className="mt-12 flex items-center gap-3">
-        <div className="h-px w-12 bg-border" />
-        <span className="text-muted-foreground text-xs tracking-widest uppercase">
-          THR 1445 H
-        </span>
-        <div className="h-px w-12 bg-border" />
-      </div>
-
       <style>{`
         .submit-btn {
-          background: hsl(4 72% 38%);
+          background: hsl(138 48% 30%);
           color: hsl(36 80% 96%);
           font-family: Georgia, serif;
           font-weight: bold;
@@ -110,18 +104,18 @@ export function NameInput({ onSubmit }: NameInputProps) {
           letter-spacing: 0.03em;
           padding: 13px 28px;
           border: none;
-          border-radius: 4px;
+          border-radius: 9999px;
           cursor: pointer;
-          box-shadow: 0 4px 0 hsl(4 72% 22%);
+          box-shadow: 0 4px 0 hsl(138 48% 18%);
           transition: transform 120ms ease-out, box-shadow 120ms ease-out;
         }
         .submit-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 0 hsl(4 72% 22%), 0 10px 20px hsl(4 72% 38% / 0.25);
+          box-shadow: 0 6px 0 hsl(138 48% 18%), 0 10px 20px hsl(138 48% 30% / 0.25);
         }
         .submit-btn:active {
           transform: translateY(2px) scale(0.97);
-          box-shadow: 0 2px 0 hsl(4 72% 22%);
+          box-shadow: 0 2px 0 hsl(138 48% 18%);
         }
       `}</style>
     </div>

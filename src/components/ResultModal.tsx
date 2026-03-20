@@ -9,23 +9,14 @@ interface ResultModalProps {
 export function ResultModal({ name, result, onClose }: ResultModalProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: "hsla(20 15% 12% / 0.6)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-md"
+      style={{ background: "hsla(20 15% 12% / 0.8)" }}
       onClick={onClose}
     >
       <div
-        className="result-pop relative bg-card rounded-sm text-center max-w-sm w-full overflow-hidden"
-        style={{
-          border: "4px solid hsl(4 72% 38%)",
-          boxShadow: "0 12px 48px hsl(4 72% 38% / 0.35)",
-        }}
+        className="result-pop relative bg-white rounded-3xl text-center max-w-sm w-full overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.3)] border-4 border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top accent bar */}
-        <div
-          className="h-3 w-full"
-          style={{ background: "hsl(4 72% 38%)" }}
-        />
 
         <div className="px-8 pt-8 pb-10 flex flex-col items-center gap-4">
           {/* Star icon */}
@@ -40,7 +31,7 @@ export function ResultModal({ name, result, onClose }: ResultModalProps) {
           <div>
             <p
               className="text-xs font-bold tracking-widest uppercase mb-1"
-              style={{ color: "hsl(4 72% 38%)" }}
+              style={{ color: "hsl(138 48% 30%)" }}
             >
               Selamat, {name}!
             </p>
@@ -54,7 +45,7 @@ export function ResultModal({ name, result, onClose }: ResultModalProps) {
 
           {/* Prize box */}
           <div
-            className="w-full py-5 rounded-sm"
+            className="w-full py-5 rounded-full"
             style={{
               background: result.color,
               border: "2px solid hsl(0 0% 0% / 0.08)",
@@ -87,7 +78,7 @@ export function ResultModal({ name, result, onClose }: ResultModalProps) {
 
       <style>{`
         .close-btn {
-          background: hsl(145 45% 28%);
+          background: hsl(138 48% 30%);
           color: hsl(0 0% 100%);
           font-family: Georgia, serif;
           font-weight: bold;
@@ -95,19 +86,19 @@ export function ResultModal({ name, result, onClose }: ResultModalProps) {
           letter-spacing: 0.03em;
           padding: 11px 32px;
           border: none;
-          border-radius: 4px;
+          border-radius: 9999px;
           cursor: pointer;
-          box-shadow: 0 4px 0 hsl(145 45% 16%);
+          box-shadow: 0 4px 0 hsl(138 48% 18%);
           transition: transform 120ms ease-out, box-shadow 120ms ease-out;
           margin-top: 4px;
         }
         .close-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 0 hsl(145 45% 16%), 0 10px 20px hsl(145 45% 28% / 0.25);
+          box-shadow: 0 6px 0 hsl(138 48% 18%), 0 10px 20px hsl(138 48% 30% / 0.25);
         }
         .close-btn:active {
           transform: translateY(2px) scale(0.97);
-          box-shadow: 0 2px 0 hsl(145 45% 16%);
+          box-shadow: 0 2px 0 hsl(138 48% 18%);
         }
       `}</style>
     </div>

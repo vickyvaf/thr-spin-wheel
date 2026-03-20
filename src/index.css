@@ -18,7 +18,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 20 15% 12%;
 
-    --primary: 4 72% 38%;
+    --primary: 138 48% 30%;
     --primary-foreground: 36 80% 96%;
 
     --secondary: 36 80% 50%;
@@ -30,21 +30,21 @@
     --accent: 145 40% 30%;
     --accent-foreground: 36 80% 96%;
 
-    --destructive: 4 72% 38%;
+    --destructive: 138 48% 30%;
     --destructive-foreground: 36 80% 96%;
 
     --border: 36 20% 82%;
     --input: 36 20% 82%;
-    --ring: 4 72% 38%;
+    --ring: 138 48% 30%;
 
     --radius: 0.75rem;
 
     /* Wheel segment colors — all solid HSL */
-    --wheel-1: 4 72% 38%;
+    --wheel-1: 138 48% 30%;
     --wheel-2: 36 85% 48%;
     --wheel-3: 145 45% 28%;
     --wheel-4: 214 60% 28%;
-    --wheel-5: 4 72% 38%;
+    --wheel-5: 138 48% 30%;
     --wheel-6: 36 85% 48%;
     --wheel-7: 145 45% 28%;
     --wheel-8: 214 60% 28%;
@@ -73,7 +73,7 @@
 
 @layer utilities {
   .spin-wheel-container {
-    filter: drop-shadow(0 8px 24px hsl(4 72% 38% / 0.25));
+    filter: drop-shadow(0 8px 24px hsl(138 48% 30% / 0.25));
   }
 }
 
@@ -190,7 +190,19 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: auto;   /* Allow vertical scroll if needed */
+    scrollbar-width: none; /* Firefox */
+
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }
+
+

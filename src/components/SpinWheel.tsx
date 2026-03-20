@@ -7,27 +7,38 @@ export interface WheelSegment {
 }
 
 // Segments layout (8 slots):
-// Index: 0=2rb, 1=5rb, 2=2rb, 3=10rb, 4=2rb, 5=20rb, 6=2rb, 7=50rb
+// Index: 0=2rb, 1=5rb, 2=2rb, 3=10rb, 4=2rb, 5=20rb, 6=2rb, 7=100rb
 const SEGMENTS: WheelSegment[] = [
-  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
-  { label: "Rp 5.000",  color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
-  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 10.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
-  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
-  { label: "Rp 20.000", color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
-  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 2.000", color: "hsl(138 48% 30%)", textColor: "#fff8f0" },
+  { label: "Rp 5.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
+  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 10.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
   { label: "Rp 50.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 20.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
+  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 100.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
 ];
 
-// Win-index rules
-const IDX_2000  = [0, 2, 4, 6]; // default → always Rp 2.000
-const IDX_50000 = 7;             // vicky → Rp 50.000
+// Aturan kemenangan khusus: Tambahkan nama dan indeks hadiah di sini
+const WIN_RULES = [
+  { name: "vicky", index: 7 }, // Rp 100.000
+];
+
+// Indeks hadiah bawaan (Rp 2.000) untuk pengguna lain
+const DEFAULT_INDICES = [0, 1, 2, 3, 6];
 
 function pickWinIndex(name: string): number {
-  const lower = name.trim().toLowerCase();
-  if (lower === "vicky") return IDX_50000;
-  // default: always Rp 2.000 — pick one of the four 2.000 slots randomly
-  return IDX_2000[Math.floor(Math.random() * IDX_2000.length)];
+  const lowerName = name.trim().toLowerCase();
+  const specialRule = WIN_RULES.find(
+    (rule) => rule.name.toLowerCase() === lowerName,
+  );
+
+  if (specialRule) {
+    return specialRule.index;
+  }
+
+  // default: pilih salah satu dari indeks fallback secara acak
+  return DEFAULT_INDICES[Math.floor(Math.random() * DEFAULT_INDICES.length)];
 }
 
 const TOTAL = SEGMENTS.length;
@@ -37,13 +48,42 @@ interface SpinWheelProps {
   name: string;
   onResult: (segment: WheelSegment) => void;
   disabled: boolean;
+  isTickMuted?: boolean;
 }
 
-export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
+export function SpinWheel({
+  name,
+  onResult,
+  disabled,
+  isTickMuted = false,
+}: SpinWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rotationRef = useRef(0); // current rotation in radians
+  const lastTickRef = useRef(-1); // track the last segment boundary index for sound
   const animRef = useRef<number | null>(null);
   const [spinning, setSpinning] = useState(false);
+
+  // Audio refs for preloading
+  const tickAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio("/tick.MP3");
+    audio.preload = "auto";
+    tickAudioRef.current = audio;
+  }, []);
+
+  // Play tick sound using the loaded file
+  const playTick = useCallback(() => {
+    if (isTickMuted || !tickAudioRef.current) return;
+    try {
+      // Create a fresh instance for fast-overlapping ticks
+      const sound = tickAudioRef.current.cloneNode() as HTMLAudioElement;
+      sound.volume = 1;
+      sound.play().catch(() => {});
+    } catch (e) {
+      console.warn("Tick sound error", e);
+    }
+  }, [isTickMuted]);
 
   const drawWheel = useCallback((rotation: number) => {
     const canvas = canvasRef.current;
@@ -91,20 +131,20 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
     ctx.arc(cx, cy, SIZE * 0.09, 0, 2 * Math.PI);
     ctx.fillStyle = "hsl(36 30% 95%)";
     ctx.fill();
-    ctx.strokeStyle = "hsl(4 72% 38%)";
+    ctx.strokeStyle = "hsl(138 48% 30%)";
     ctx.lineWidth = 3;
     ctx.stroke();
 
     // Center dot
     ctx.beginPath();
     ctx.arc(cx, cy, SIZE * 0.025, 0, 2 * Math.PI);
-    ctx.fillStyle = "hsl(4 72% 38%)";
+    ctx.fillStyle = "hsl(138 48% 30%)";
     ctx.fill();
 
     // Outer ring
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = "hsl(4 72% 30%)";
+    ctx.strokeStyle = "hsl(138 48% 23%)";
     ctx.lineWidth = 5;
     ctx.stroke();
   }, []);
@@ -121,12 +161,16 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
 
     // Target angle: pointer sits at top (−π/2).
     // We need the center of winIndex segment to land there.
-    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full rotations
-    const targetAngle = -Math.PI / 2 - winIndex * ARC - ARC / 2;
-    const totalRotation = fullSpins * 2 * Math.PI + targetAngle;
-
+    const extraSpins = 8;
     const startRotation = rotationRef.current;
-    const deltaRotation = totalRotation - (startRotation % (2 * Math.PI)) + 2 * Math.PI * fullSpins;
+    const currentAngle = startRotation % (2 * Math.PI);
+    const targetAngle = -Math.PI / 2 - winIndex * ARC - ARC / 2;
+
+    // Calculate how much we need to rotate to reach targetAngle from currentAngle
+    let angleToTarget = targetAngle - currentAngle;
+    while (angleToTarget < 0) angleToTarget += 2 * Math.PI;
+
+    const deltaRotation = extraSpins * 2 * Math.PI + angleToTarget;
 
     const duration = 5000; // 5 seconds
     let startTime: number | null = null;
@@ -134,7 +178,8 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
     setSpinning(true);
 
     // Ease-out: starts fast, decelerates to a smooth stop
-    const ease = (t: number) => 1 - Math.pow(1 - t, 3.5);
+    // Power of 4 provides a nice premium "fast-then-slow" feel
+    const ease = (t: number) => 1 - Math.pow(1 - t, 4);
 
     const animate = (now: number) => {
       if (!startTime) startTime = now;
@@ -144,6 +189,14 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
 
       rotationRef.current = startRotation + deltaRotation * eased;
       drawWheel(rotationRef.current);
+
+      // detect segment boundary crossing for tick sound
+      // -rotationRef.current because the wheel rotates clockwise but angle math is counter-clockwise
+      const currentTickIdx = Math.floor(rotationRef.current / ARC);
+      if (currentTickIdx !== lastTickRef.current) {
+        lastTickRef.current = currentTickIdx;
+        playTick();
+      }
 
       if (t < 1) {
         animRef.current = requestAnimationFrame(animate);
@@ -170,7 +223,7 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
             height: 0,
             borderLeft: "14px solid transparent",
             borderRight: "14px solid transparent",
-            borderTop: "28px solid hsl(4 72% 38%)",
+            borderTop: "28px solid hsl(138 48% 30%)",
             filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
           }}
         />
@@ -188,12 +241,12 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
         disabled={spinning || disabled}
         className="spin-btn"
       >
-        {spinning ? "Sedang Memutar…" : "🎉 PUTAR SEKARANG"}
+        {spinning ? "Sedang Memutar…" : "PUTAR SEKARANG"}
       </button>
 
       <style>{`
         .spin-btn {
-          background: hsl(4 72% 38%);
+          background: hsl(138 48% 30%);
           color: hsl(36 80% 96%);
           font-family: Georgia, serif;
           font-weight: bold;
@@ -201,18 +254,18 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
           letter-spacing: 0.04em;
           padding: 14px 42px;
           border: none;
-          border-radius: 4px;
+          border-radius: 9999px;
           cursor: pointer;
-          box-shadow: 0 4px 0 hsl(4 72% 22%), 0 6px 16px hsl(4 72% 38% / 0.3);
+          box-shadow: 0 4px 0 hsl(138 48% 18%), 0 6px 16px hsl(138 48% 30% / 0.3);
           transition: transform 120ms ease-out, box-shadow 120ms ease-out;
         }
         .spin-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 6px 0 hsl(4 72% 22%), 0 10px 24px hsl(4 72% 38% / 0.35);
+          box-shadow: 0 6px 0 hsl(138 48% 18%), 0 10px 24px hsl(138 48% 30% / 0.35);
         }
         .spin-btn:active:not(:disabled) {
           transform: translateY(2px) scale(0.97);
-          box-shadow: 0 2px 0 hsl(4 72% 22%), 0 4px 10px hsl(4 72% 38% / 0.2);
+          box-shadow: 0 2px 0 hsl(138 48% 18%), 0 4px 10px hsl(138 48% 30% / 0.2);
         }
         .spin-btn:disabled {
           opacity: 0.55;
