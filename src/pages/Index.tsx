@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useWindowSize } from "react-use";
 import confetti from "canvas-confetti";
 import { NameInput } from "@/components/NameInput";
@@ -16,6 +16,60 @@ const Index = () => {
   const [spinCount, setSpinCount] = useState(0);
   const [isBacksoundMuted, setIsBacksoundMuted] = useState(false);
   const [isTickMuted, setIsTickMuted] = useState(false);
+
+  // Background video state
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Load and cache background video
+  useEffect(() => {
+    const videoSrc = "/bg-animated-loop.mp4";
+    const cacheName = "vaf-video-cache";
+
+    const loadAndCacheVideo = async () => {
+      try {
+        // If the browser doesn't support Cache API, fallback to direct URL
+        if (!("caches" in window)) {
+          setVideoUrl(videoSrc);
+          return;
+        }
+
+        const cache = await caches.open(cacheName);
+        let response = await cache.match(videoSrc);
+
+        if (!response) {
+          console.log("Fetching and caching background video...");
+          response = await fetch(videoSrc);
+          if (response.ok) {
+            await cache.put(videoSrc, response.clone());
+          } else {
+            throw new Error("Failed to fetch video");
+          }
+        } else {
+          console.log("Loading background video from cache...");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setVideoUrl(url);
+      } catch (error) {
+        console.warn(
+          "Video caching failed, falling back to direct URL:",
+          error,
+        );
+        setVideoUrl(videoSrc);
+      }
+    };
+
+    loadAndCacheVideo();
+
+    return () => {
+      if (videoUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (result) {
@@ -88,63 +142,86 @@ const Index = () => {
   };
 
   return (
-    <div
-      className="min-h-screen relative bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/background.png')" }}
-    >
-      {step === "input" && (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="max-w-md w-full">
-            <NameInput onSubmit={handleNameSubmit} />
-          </div>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Default Static Background Image (Always behind the video) */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/background.png')" }}
+      />
+
+      {/* Animated Video Background (Visible only when loaded) */}
+      {videoUrl && (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onCanPlayThrough={() => setIsVideoLoaded(true)}
+          className={`fixed inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            isVideoLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          src={videoUrl}
+        />
       )}
 
-      {step === "wheel" && (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-          {/* Main Content Area (No Background) */}
-          <div className="flex flex-col items-center">
-            {/* Header */}
-            <div className="mb-8 text-center max-w-md w-full">
-              <h1
-                className="text-4xl font-bold text-foreground leading-tight mb-2"
-                style={{
-                  fontFamily: "Georgia, serif",
-                  letterSpacing: "-0.02em",
-                  textShadow: "0 1px 2px rgba(255,255,255,0.8)",
-                }}
-              >
-                Dapatkan THR🤑
-              </h1>
-              <p className="text-foreground/80 text-sm mb-6 font-medium">
-                Halo, <span className="font-bold text-foreground">{name}</span>!
-                Putar roda untuk mendapatkan THR-mu.
-              </p>
-
-              <SpinWheel
-                key={spinCount}
-                name={name}
-                onResult={handleResult}
-                disabled={!!result}
-                isTickMuted={isTickMuted}
-              />
-
-              {/* Back link */}
-              <button
-                onClick={() => {
-                  setStep("input");
-                  setResult(null);
-                  setSpinCount(0);
-                }}
-                className="mt-8 text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
-                style={{ fontFamily: "Georgia, serif" }}
-              >
-                ← Ganti nama
-              </button>
+      {/* Main Content Overlay */}
+      <div className="relative z-10 w-full">
+        {step === "input" && (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="max-w-md w-full">
+              <NameInput onSubmit={handleNameSubmit} />
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {step === "wheel" && (
+          <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+            {/* Main Content Area (No Background) */}
+            <div className="flex flex-col items-center">
+              {/* Header */}
+              <div className="mb-8 text-center max-w-md w-full">
+                <h1
+                  className="text-4xl font-bold text-foreground leading-tight mb-2"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    letterSpacing: "-0.02em",
+                    textShadow: "0 1px 2px rgba(255,255,255,0.8)",
+                  }}
+                >
+                  Dapatkan THR🤑
+                </h1>
+                <p className="text-foreground/80 text-sm mb-6 font-medium">
+                  Halo,{" "}
+                  <span className="font-bold text-foreground">{name}</span>!
+                  Putar roda untuk mendapatkan THR-mu.
+                </p>
+
+                <SpinWheel
+                  key={spinCount}
+                  name={name}
+                  onResult={handleResult}
+                  disabled={!!result}
+                  isTickMuted={isTickMuted}
+                />
+
+                {/* Back link */}
+                <button
+                  onClick={() => {
+                    setStep("input");
+                    setResult(null);
+                    setSpinCount(0);
+                  }}
+                  className="mt-8 text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  ← Ganti nama
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {result && (
         <ResultModal name={name} result={result} onClose={handleCloseResult} />
