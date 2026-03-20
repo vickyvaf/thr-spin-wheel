@@ -21,11 +21,12 @@ const SEGMENTS: WheelSegment[] = [
 
 // Aturan kemenangan khusus: Tambahkan nama dan indeks hadiah di sini
 const WIN_RULES = [
-  { name: "vicky", index: 7 }, // Rp 100.000
+  // { name: "vicky", index: 7 }, // Rp 100.000
 ];
 
 // Indeks hadiah bawaan (Rp 2.000) untuk pengguna lain
-const DEFAULT_INDICES = [0, 1, 2, 3, 6];
+// const DEFAULT_INDICES = [0, 1, 2, 3, 6];
+const DEFAULT_INDICES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 function pickWinIndex(name: string): number {
   const lowerName = name.trim().toLowerCase();
