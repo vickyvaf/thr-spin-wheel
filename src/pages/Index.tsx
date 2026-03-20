@@ -59,6 +59,7 @@ const Index = () => {
 
           <SpinWheel
             key={spinCount}
+            name={name}
             onResult={handleResult}
             disabled={!!result}
           />

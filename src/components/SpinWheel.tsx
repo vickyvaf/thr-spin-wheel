@@ -116,27 +116,24 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
   const spin = useCallback(() => {
     if (spinning || disabled) return;
 
-    // Pick a random winning segment
-    const winIndex = Math.floor(Math.random() * TOTAL);
+    // Determine winning index based on name rules
+    const winIndex = pickWinIndex(name);
 
-    // Target angle: pointer is at top (−π/2).
-    // We want the center of winIndex segment to land at top.
-    // winIndex segment center is at: winIndex * ARC + ARC/2 (from rotation=0)
-    // We need: rotation + winIndex * ARC + ARC/2 = -π/2 + 2πk
-    // So targetRotation = -π/2 - winIndex * ARC - ARC/2 + 2πk
-    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full spins
+    // Target angle: pointer sits at top (−π/2).
+    // We need the center of winIndex segment to land there.
+    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full rotations
     const targetAngle = -Math.PI / 2 - winIndex * ARC - ARC / 2;
     const totalRotation = fullSpins * 2 * Math.PI + targetAngle;
 
     const startRotation = rotationRef.current;
     const deltaRotation = totalRotation - (startRotation % (2 * Math.PI)) + 2 * Math.PI * fullSpins;
 
-    const duration = 5000; // ms
+    const duration = 5000; // 5 seconds
     let startTime: number | null = null;
 
     setSpinning(true);
 
-    // Custom easing: fast start, slow end (cubic ease-out)
+    // Ease-out: starts fast, decelerates to a smooth stop
     const ease = (t: number) => 1 - Math.pow(1 - t, 3.5);
 
     const animate = (now: number) => {
@@ -159,7 +156,7 @@ export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
     };
 
     animRef.current = requestAnimationFrame(animate);
-  }, [spinning, disabled, drawWheel, onResult]);
+  }, [spinning, disabled, name, drawWheel, onResult]);
 
   return (
     <div className="flex flex-col items-center gap-6">
