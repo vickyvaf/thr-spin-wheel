@@ -2,13 +2,15 @@
 
 An interactive, festive web application to gamify the tradition of giving *Tunjangan Hari Raya* (THR) during Eid al-Fitr.
 
+## Preview
+https://github.com/user-attachments/assets/f93d5537-bdb6-40b1-925f-167ed5aeeb23
+
 ## ✨ Features
 
 - **Interactive Spin Wheel**: A smooth, canvas-based animation with realistic deceleration.
 - **Festive Eid Theme**: Elegant design using a curated color palette (Red, Gold, Green) and classic typography.
 - **Personalized Experience**: Users enter their name to participate.
 - **Responsive Design**: Works perfectly on both Mobile and Desktop browsers.
-- **Smart Result Logic**: Hardcoded probability logic for specific fun interactions.
 
 ## 🚀 Tech Stack
 
