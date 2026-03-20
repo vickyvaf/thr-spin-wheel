@@ -24,7 +24,7 @@ const Index = () => {
 
   // Load and cache background video
   useEffect(() => {
-    const videoSrc = "/bg-animated-loop.mp4";
+    const videoSrc = "/background-animated-loop.mp4";
     const cacheName = "vaf-video-cache";
 
     const loadAndCacheVideo = async () => {
