@@ -212,9 +212,9 @@ export function SpinWheel({
   }, [spinning, disabled, name, drawWheel, onResult]);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 w-full max-w-[380px] mx-auto overflow-visible">
       {/* Pointer */}
-      <div className="relative w-fit">
+      <div className="relative w-full flex justify-center">
         {/* Triangle pointer at top */}
         <div
           className="absolute left-1/2 -translate-x-1/2 -top-3 z-10"
@@ -229,9 +229,9 @@ export function SpinWheel({
         />
         <canvas
           ref={canvasRef}
-          width={380}
-          height={380}
-          className="spin-wheel-container block"
+          width={500}
+          height={500}
+          className="block w-full h-auto aspect-square"
           style={{ borderRadius: "50%" }}
         />
       </div>

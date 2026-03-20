@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { NameInput } from "@/components/NameInput";
 import { SpinWheel, type WheelSegment } from "@/components/SpinWheel";
 import { ResultModal } from "@/components/ResultModal";
-import { Music, Music2, BellRing, BellOff } from "lucide-react";
+import { Music, Music2, BellRing, BellOff, ChevronLeft } from "lucide-react";
 
 type Step = "input" | "wheel";
 
@@ -168,7 +168,7 @@ const Index = () => {
       {/* Main Content Overlay */}
       <div className="relative z-10 w-full">
         {step === "input" && (
-          <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="min-h-screen flex flex-col items-center justify-start sm:justify-center px-4 pt-20 pb-12 sm:p-4">
             <div className="max-w-md w-full">
               <NameInput onSubmit={handleNameSubmit} />
             </div>
@@ -176,13 +176,13 @@ const Index = () => {
         )}
 
         {step === "wheel" && (
-          <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+          <div className="min-h-screen flex flex-col items-center justify-start sm:justify-center px-4 pt-20 pb-12 sm:py-12">
             {/* Main Content Area (No Background) */}
             <div className="flex flex-col items-center">
               {/* Header */}
               <div className="mb-8 text-center max-w-md w-full">
                 <h1
-                  className="text-4xl font-bold text-foreground leading-tight mb-2"
+                  className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2"
                   style={{
                     fontFamily: "Georgia, serif",
                     letterSpacing: "-0.02em",
@@ -197,26 +197,17 @@ const Index = () => {
                   Putar roda untuk mendapatkan THR-mu.
                 </p>
 
-                <SpinWheel
-                  key={spinCount}
-                  name={name}
-                  onResult={handleResult}
-                  disabled={!!result}
-                  isTickMuted={isTickMuted}
-                />
+                <div className="w-full flex justify-center">
+                  <SpinWheel
+                    key={spinCount}
+                    name={name}
+                    onResult={handleResult}
+                    disabled={!!result}
+                    isTickMuted={isTickMuted}
+                  />
+                </div>
 
-                {/* Back link */}
-                <button
-                  onClick={() => {
-                    setStep("input");
-                    setResult(null);
-                    setSpinCount(0);
-                  }}
-                  className="mt-8 text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  ← Ganti nama
-                </button>
+
               </div>
             </div>
           </div>
@@ -227,12 +218,32 @@ const Index = () => {
         <ResultModal name={name} result={result} onClose={handleCloseResult} />
       )}
 
+      {/* Floating Back Button (Wheel Step) */}
+      {step === "wheel" && (
+        <div className="fixed top-4 left-4 sm:top-8 sm:left-8 z-50">
+          <button
+            onClick={() => {
+              setStep("input");
+              setResult(null);
+              setSpinCount(0);
+            }}
+            className="flex items-center p-2.5 sm:p-3.5 rounded-full bg-white border border-border shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-primary hover:bg-slate-50 transition-all active:scale-95 group focus:outline-none focus:ring-2 focus:ring-primary/20"
+            aria-label="Kembali ke Input Nama"
+          >
+            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+            <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out text-sm font-medium pl-0 group-hover:pl-2">
+              Ganti Nama
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Floating Audio Controls */}
-      <div className="fixed top-8 right-8 z-50 flex items-center gap-3">
+      <div className="fixed top-4 right-4 sm:top-8 sm:right-8 z-50 flex items-center gap-2 sm:gap-3">
         {/* Backsound Control */}
         <button
           onClick={() => setIsBacksoundMuted(!isBacksoundMuted)}
-          className="flex items-center p-3.5 rounded-full bg-white border border-border shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-primary hover:bg-slate-50 transition-all active:scale-95 group focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="flex items-center p-2.5 sm:p-3.5 rounded-full bg-white border border-border shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-primary hover:bg-slate-50 transition-all active:scale-95 group focus:outline-none focus:ring-2 focus:ring-primary/20"
           aria-label={isBacksoundMuted ? "Unmute Backsound" : "Mute Backsound"}
         >
           <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out text-sm font-medium pl-0 group-hover:pl-2">
@@ -250,7 +261,7 @@ const Index = () => {
         {/* Tick Sound Control */}
         <button
           onClick={() => setIsTickMuted(!isTickMuted)}
-          className="flex items-center p-3.5 rounded-full bg-white border border-border shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-primary hover:bg-slate-50 transition-all active:scale-95 group focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="flex items-center p-2.5 sm:p-3.5 rounded-full bg-white border border-border shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-primary hover:bg-slate-50 transition-all active:scale-95 group focus:outline-none focus:ring-2 focus:ring-primary/20"
           aria-label={isTickMuted ? "Unmute Tick Sound" : "Mute Tick Sound"}
         >
           <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out text-sm font-medium pl-0 group-hover:pl-2">

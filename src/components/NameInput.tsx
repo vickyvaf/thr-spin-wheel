@@ -28,7 +28,7 @@ export function NameInput({ onSubmit }: NameInputProps) {
       {/* Header */}
       <div className="mb-10 text-center">
         <h1
-          className="text-5xl font-bold text-foreground mb-3 leading-tight"
+          className="text-4xl sm:text-5xl font-bold text-foreground mb-3 leading-tight"
           style={{ 
             fontFamily: "Georgia, serif", 
             letterSpacing: "-0.02em",
