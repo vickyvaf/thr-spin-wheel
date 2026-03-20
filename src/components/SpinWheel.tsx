@@ -6,26 +6,40 @@ export interface WheelSegment {
   textColor: string;
 }
 
+// Segments layout (8 slots):
+// Index: 0=2rb, 1=5rb, 2=2rb, 3=10rb, 4=2rb, 5=20rb, 6=2rb, 7=50rb
 const SEGMENTS: WheelSegment[] = [
-  { label: "Rp 100.000", color: "hsl(4 72% 38%)", textColor: "#fff8f0" },
-  { label: "Rp 500.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 200.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 1.000.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
-  { label: "Rp 50.000", color: "hsl(4 72% 38%)", textColor: "#fff8f0" },
-  { label: "Rp 750.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 250.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 300.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
+  { label: "Rp 5.000",  color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
+  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 10.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
+  { label: "Rp 20.000", color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
+  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 50.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
 ];
+
+// Win-index rules
+const IDX_2000  = [0, 2, 4, 6]; // default → always Rp 2.000
+const IDX_50000 = 7;             // vicky → Rp 50.000
+
+function pickWinIndex(name: string): number {
+  const lower = name.trim().toLowerCase();
+  if (lower === "vicky") return IDX_50000;
+  // default: always Rp 2.000 — pick one of the four 2.000 slots randomly
+  return IDX_2000[Math.floor(Math.random() * IDX_2000.length)];
+}
 
 const TOTAL = SEGMENTS.length;
 const ARC = (2 * Math.PI) / TOTAL;
 
 interface SpinWheelProps {
+  name: string;
   onResult: (segment: WheelSegment) => void;
   disabled: boolean;
 }
 
-export function SpinWheel({ onResult, disabled }: SpinWheelProps) {
+export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rotationRef = useRef(0); // current rotation in radians
   const animRef = useRef<number | null>(null);
