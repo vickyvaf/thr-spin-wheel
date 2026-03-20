@@ -6,26 +6,40 @@ export interface WheelSegment {
   textColor: string;
 }
 
+// Segments layout (8 slots):
+// Index: 0=2rb, 1=5rb, 2=2rb, 3=10rb, 4=2rb, 5=20rb, 6=2rb, 7=50rb
 const SEGMENTS: WheelSegment[] = [
-  { label: "Rp 100.000", color: "hsl(4 72% 38%)", textColor: "#fff8f0" },
-  { label: "Rp 500.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 200.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 1.000.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
-  { label: "Rp 50.000", color: "hsl(4 72% 38%)", textColor: "#fff8f0" },
-  { label: "Rp 750.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 250.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 300.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
+  { label: "Rp 5.000",  color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
+  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 10.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 2.000",  color: "hsl(4 72% 38%)",   textColor: "#fff8f0" },
+  { label: "Rp 20.000", color: "hsl(36 85% 48%)",  textColor: "#1a0a00" },
+  { label: "Rp 2.000",  color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
+  { label: "Rp 50.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
 ];
+
+// Win-index rules
+const IDX_2000  = [0, 2, 4, 6]; // default → always Rp 2.000
+const IDX_50000 = 7;             // vicky → Rp 50.000
+
+function pickWinIndex(name: string): number {
+  const lower = name.trim().toLowerCase();
+  if (lower === "vicky") return IDX_50000;
+  // default: always Rp 2.000 — pick one of the four 2.000 slots randomly
+  return IDX_2000[Math.floor(Math.random() * IDX_2000.length)];
+}
 
 const TOTAL = SEGMENTS.length;
 const ARC = (2 * Math.PI) / TOTAL;
 
 interface SpinWheelProps {
+  name: string;
   onResult: (segment: WheelSegment) => void;
   disabled: boolean;
 }
 
-export function SpinWheel({ onResult, disabled }: SpinWheelProps) {
+export function SpinWheel({ name, onResult, disabled }: SpinWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rotationRef = useRef(0); // current rotation in radians
   const animRef = useRef<number | null>(null);
@@ -102,27 +116,24 @@ export function SpinWheel({ onResult, disabled }: SpinWheelProps) {
   const spin = useCallback(() => {
     if (spinning || disabled) return;
 
-    // Pick a random winning segment
-    const winIndex = Math.floor(Math.random() * TOTAL);
+    // Determine winning index based on name rules
+    const winIndex = pickWinIndex(name);
 
-    // Target angle: pointer is at top (−π/2).
-    // We want the center of winIndex segment to land at top.
-    // winIndex segment center is at: winIndex * ARC + ARC/2 (from rotation=0)
-    // We need: rotation + winIndex * ARC + ARC/2 = -π/2 + 2πk
-    // So targetRotation = -π/2 - winIndex * ARC - ARC/2 + 2πk
-    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full spins
+    // Target angle: pointer sits at top (−π/2).
+    // We need the center of winIndex segment to land there.
+    const fullSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full rotations
     const targetAngle = -Math.PI / 2 - winIndex * ARC - ARC / 2;
     const totalRotation = fullSpins * 2 * Math.PI + targetAngle;
 
     const startRotation = rotationRef.current;
     const deltaRotation = totalRotation - (startRotation % (2 * Math.PI)) + 2 * Math.PI * fullSpins;
 
-    const duration = 5000; // ms
+    const duration = 5000; // 5 seconds
     let startTime: number | null = null;
 
     setSpinning(true);
 
-    // Custom easing: fast start, slow end (cubic ease-out)
+    // Ease-out: starts fast, decelerates to a smooth stop
     const ease = (t: number) => 1 - Math.pow(1 - t, 3.5);
 
     const animate = (now: number) => {
@@ -145,7 +156,7 @@ export function SpinWheel({ onResult, disabled }: SpinWheelProps) {
     };
 
     animRef.current = requestAnimationFrame(animate);
-  }, [spinning, disabled, drawWheel, onResult]);
+  }, [spinning, disabled, name, drawWheel, onResult]);
 
   return (
     <div className="flex flex-col items-center gap-6">
