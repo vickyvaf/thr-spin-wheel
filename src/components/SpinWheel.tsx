@@ -4,19 +4,25 @@ export interface WheelSegment {
   label: string;
   color: string;
   textColor: string;
+  imageUrl?: string;
 }
 
 // Segments layout (8 slots):
 // Index: 0=2rb, 1=5rb, 2=2rb, 3=10rb, 4=2rb, 5=20rb, 6=2rb, 7=100rb
 const SEGMENTS: WheelSegment[] = [
-  { label: "Rp 2.000", color: "hsl(138 48% 30%)", textColor: "#fff8f0" },
-  { label: "Rp 5.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 10.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 50.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
-  { label: "Rp 20.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" },
-  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" },
-  { label: "Rp 100.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" },
+  { label: "Rp 2.000", color: "hsl(138 48% 30%)", textColor: "#fff8f0" }, // 0
+  { label: "Rp 5.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" }, // 1
+  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" }, // 2
+  { label: "Rp 10.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" }, // 3
+  { label: "Rp 50.000", color: "hsl(214 60% 28%)", textColor: "#f0f7ff" }, // 4
+  { label: "Rp 20.000", color: "hsl(36 85% 48%)", textColor: "#1a0a00" }, // 5
+  { label: "Rp 2.000", color: "hsl(145 45% 28%)", textColor: "#f0fff4" }, // 6
+  {
+    label: "Iphone 17 Pro Max",
+    color: "hsl(100, 100%, 100%)",
+    textColor: "#000",
+    imageUrl: "/iphone.png",
+  }, // 7
 ];
 
 // Aturan kemenangan khusus: Tambahkan nama dan indeks hadiah di sini
@@ -63,6 +69,7 @@ export function SpinWheel({
   const lastTickRef = useRef(-1); // track the last segment boundary index for sound
   const animRef = useRef<number | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const imageCache = useRef<Record<number, HTMLImageElement>>({});
 
   // Audio refs for preloading
   const tickAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -116,14 +123,27 @@ export function SpinWheel({
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Label
+      // Label or Image
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(startAngle + ARC / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = seg.textColor;
-      ctx.font = `bold ${SIZE * 0.044}px Georgia, serif`;
-      ctx.fillText(seg.label, radius - 14, SIZE * 0.016);
+
+      if (seg.imageUrl && imageCache.current[i]) {
+        const img = imageCache.current[i];
+        const imgSize = SIZE * 0.2;
+        ctx.drawImage(
+          img,
+          radius - imgSize - 20,
+          -imgSize / 2,
+          imgSize,
+          imgSize,
+        );
+      } else {
+        ctx.textAlign = "right";
+        ctx.fillStyle = seg.textColor;
+        ctx.font = `bold ${SIZE * 0.044}px Georgia, serif`;
+        ctx.fillText(seg.label, radius - 14, SIZE * 0.016);
+      }
       ctx.restore();
     });
 
@@ -149,6 +169,27 @@ export function SpinWheel({
     ctx.lineWidth = 5;
     ctx.stroke();
   }, []);
+
+  useEffect(() => {
+    const audio = new Audio("/tick.MP3");
+    audio.preload = "auto";
+    tickAudioRef.current = audio;
+  }, []);
+
+  // Preload prize images
+  useEffect(() => {
+    SEGMENTS.forEach((seg, i) => {
+      if (seg.imageUrl && !imageCache.current[i]) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = seg.imageUrl;
+        img.onload = () => {
+          imageCache.current[i] = img;
+          drawWheel(rotationRef.current);
+        };
+      }
+    });
+  }, [drawWheel]);
 
   useEffect(() => {
     drawWheel(rotationRef.current);
