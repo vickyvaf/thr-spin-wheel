@@ -31,8 +31,8 @@ const WIN_RULES = [
 ];
 
 // Indeks hadiah bawaan (Rp 2.000) untuk pengguna lain
-// const DEFAULT_INDICES = [0, 1, 2, 3, 6];
-const DEFAULT_INDICES = [0, 1, 2, 3, 4, 5, 6, 7];
+const DEFAULT_INDICES = [0, 1, 2, 3, 6];
+// const DEFAULT_INDICES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 function pickWinIndex(name: string): number {
   const lowerName = name.trim().toLowerCase();
@@ -87,7 +87,7 @@ export function SpinWheel({
       // Create a fresh instance for fast-overlapping ticks
       const sound = tickAudioRef.current.cloneNode() as HTMLAudioElement;
       sound.volume = 1;
-      sound.play().catch(() => {});
+      sound.play().catch(() => { });
     } catch (e) {
       console.warn("Tick sound error", e);
     }
